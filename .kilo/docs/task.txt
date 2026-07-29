@@ -1,0 +1,35 @@
+Case - Demonstratieopdracht senior developer.docx © MH-RIG
+Case: Mini-API voor verwerken van trip-updates
+Context
+Je bouwt een kleine ASP.NET Core REST API die updates op trips verwerkt en het plan bijwerkt. We focus-
+sen op dataverwerking + domeinlogica, met lichte persistence.
+Doel
+Bouw een kleine REST API die een batch trip-updates valideert, verwerkt en de status van trips bijwerkt.
+Houd het eenvoudig en kwalitatief.
+Endpoints
+• POST /updates/trips — verwerkt updates, schrijft UpdateLog, geeft samenvatting.
+• GET /trips?lineId=&from=&to= — haalt trips met filters.
+• GET /updatelogs?from=&to=&status= — leest logs.
+Model
+• Trip(TripId, LineNo, DepartureTime, ArrivalTime, Status)
+• Line(LineId, OperatorNo, LinePlanningNumber)
+• UpdateLog(UpdateLogId, TripNo(FK Trip), UpdateTimestamp, Status:
+ONTIME|EARLY|LATE|CANCELLED|INVALID)
+• Operator (mag stub)
+Regels
+• Valideer input; statusregels ±2 min marge; schrijf log per update.
+• Persist in Mock database. Seed een paar trips.
+Verwachtingen
+• Korte, schone code met lagen.
+• 2–3 unit tests (status/validatie), 1 integratietest.
+• Swagger aan. Duidelijke commits.
+• Tijd: 2–3 uur.
+2/2
+Inlevering
+• Repo + README (architectuur in bullets, keuzes, trade-offs, run/test instructies).
+• (Optioneel) Postman/REST Client script.
+Presentatie
+• 10–15 min
+• Architectuur en keuzes
+• Demo van endpoints
+• Wat zou je in productie anders doen?
