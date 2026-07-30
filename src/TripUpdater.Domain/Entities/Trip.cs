@@ -21,16 +21,16 @@ public sealed class Trip : Entity
         DateTimeOffset departure,
         DateTimeOffset originalArrival,
         Line? line = null) => new()
-    {
-        Id = Guid.NewGuid(),
-        TripId = tripId,
-        LineNo = lineNo,
-        DepartureTime = departure,
-        OriginalArrivalTime = originalArrival,
-        ArrivalTime = null,
-        Status = Status.Ontime,
-        Line = line
-    };
+        {
+            Id = Guid.NewGuid(),
+            TripId = tripId,
+            LineNo = lineNo,
+            DepartureTime = departure,
+            OriginalArrivalTime = originalArrival,
+            ArrivalTime = null,
+            Status = Status.Ontime,
+            Line = line
+        };
 
     public Status CalculateStatus(DateTimeOffset? actualArrivalTime)
     {

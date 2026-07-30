@@ -13,14 +13,14 @@ public static class SeedData
         }
 
         var op1 = Operator.Create("GVB", "Gemeentelijk Vervoerbedrijf Amsterdam");
-        var op2 = Operator.Create("NS",  "Nederlandse Spoorwegen");
+        var op2 = Operator.Create("NS", "Nederlandse Spoorwegen");
         var op3 = Operator.Create("RET", "Rotterdamse Elektrische Tram");
 
         db.Operators.AddRange(op1, op2, op3);
 
         var line1 = Line.Create(1, "GVB", "GVB-1-AMS", op1);
         var line2 = Line.Create(2, "GVB", "GVB-2-AMS", op1);
-        var line3 = Line.Create(3, "NS",  "NS-3-UTR",  op2);
+        var line3 = Line.Create(3, "NS", "NS-3-UTR", op2);
         var line4 = Line.Create(4, "RET", "RET-4-RTD", op3);
 
         db.Lines.AddRange(line1, line2, line3, line4);
