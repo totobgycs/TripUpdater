@@ -1,0 +1,48 @@
+### TripUpdater Mini-API — sample requests
+
+@host = http://localhost:5156
+
+### List trips (optionally filtered by lineNo, from, to)
+GET {{host}}/trips
+Accept: application/json
+
+###
+
+GET {{host}}/trips?lineNo=1
+Accept: application/json
+
+###
+
+GET {{host}}/trips?lineNo=1&from=2026-07-29T08:00:00Z&to=2026-07-29T09:00:00Z
+Accept: application/json
+
+###
+
+### Process a batch of trip updates
+POST {{host}}/updates/trips
+Content-Type: application/json
+
+{
+  "updates": [
+    { "tripId": 1001, "actualArrivalTime": "2026-07-29T08:31:00+00:00" },
+    { "tripId": 1002, "actualArrivalTime": "2026-07-29T08:40:00+00:00" },
+    { "tripId": 1003, "actualArrivalTime": null },
+    { "tripId": 9999, "actualArrivalTime": "2026-07-29T08:30:00+00:00" }
+  ]
+}
+
+###
+
+### List update logs (optionally filtered by from, to, status)
+GET {{host}}/updatelogs
+Accept: application/json
+
+###
+
+GET {{host}}/updatelogs?status=Ontime
+Accept: application/json
+
+###
+
+GET {{host}}/updatelogs?from=2026-07-29T00:00:00Z&to=2026-07-30T00:00:00Z
+Accept: application/json
