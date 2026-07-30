@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);CS0436;CS8019;CA1014;CA2007</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="coverlet.collector" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TripUpdater.Api\TripUpdater.Api.csproj" ExcludeAssets="analyzers" />
+    <ProjectReference Include="..\..\src\TripUpdater.Application\TripUpdater.Application.csproj" ExcludeAssets="analyzers" />
+    <ProjectReference Include="..\..\src\TripUpdater.Domain\TripUpdater.Domain.csproj" ExcludeAssets="analyzers" />
+  </ItemGroup>
+
+</Project>

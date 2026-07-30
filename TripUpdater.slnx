@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TripUpdater.Domain/TripUpdater.Domain.csproj" />
+    <Project Path="src/TripUpdater.Application/TripUpdater.Application.csproj" />
+    <Project Path="src/TripUpdater.Infrastructure/TripUpdater.Infrastructure.csproj" />
+    <Project Path="src/TripUpdater.Api/TripUpdater.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TripUpdater.Tests/TripUpdater.Tests.csproj" />
+  </Folder>
+</Solution>
