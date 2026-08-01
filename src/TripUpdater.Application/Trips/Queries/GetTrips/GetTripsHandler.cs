@@ -1,5 +1,6 @@
 using Mediator;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using TripUpdater.Application.Common.Interfaces;
 using TripUpdater.Domain.Common;
 
@@ -18,12 +19,14 @@ public sealed class GetTripsHandler(IAppDbContext db) : IRequestHandler<GetTrips
 
         if (request.From is not null)
         {
-            query = query.Where(t => t.DepartureTime >= request.From);
+            var fromInstant = Instant.FromDateTimeOffset(request.From.Value);
+            query = query.Where(t => t.DepartureTime >= fromInstant);
         }
 
         if (request.To is not null)
         {
-            query = query.Where(t => t.DepartureTime <= request.To);
+            var toInstant = Instant.FromDateTimeOffset(request.To.Value);
+            query = query.Where(t => t.DepartureTime <= toInstant);
         }
 
         var trips = await query
@@ -31,9 +34,9 @@ public sealed class GetTripsHandler(IAppDbContext db) : IRequestHandler<GetTrips
             .Select(t => new TripDto(
                 t.TripId,
                 t.LineNo,
-                t.DepartureTime,
-                t.OriginalArrivalTime,
-                t.ArrivalTime,
+                t.DepartureTime.ToDateTimeOffset(),
+                t.OriginalArrivalTime.ToDateTimeOffset(),
+                t.ArrivalTime.HasValue ? t.ArrivalTime.Value.ToDateTimeOffset() : (DateTimeOffset?)null,
                 t.Status))
             .ToListAsync(cancellationToken);
 

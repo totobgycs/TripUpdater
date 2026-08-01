@@ -1,5 +1,6 @@
 using Mediator;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using TripUpdater.Application.Common.Interfaces;
 using TripUpdater.Domain.Common;
 
@@ -13,12 +14,14 @@ public sealed class GetUpdateLogsHandler(IAppDbContext db) : IRequestHandler<Get
 
         if (request.From is not null)
         {
-            query = query.Where(l => l.UpdateTimestamp >= request.From);
+            var fromInstant = Instant.FromDateTimeOffset(request.From.Value);
+            query = query.Where(l => l.UpdateTimestamp >= fromInstant);
         }
 
         if (request.To is not null)
         {
-            query = query.Where(l => l.UpdateTimestamp <= request.To);
+            var toInstant = Instant.FromDateTimeOffset(request.To.Value);
+            query = query.Where(l => l.UpdateTimestamp <= toInstant);
         }
 
         if (request.Status is not null)
@@ -28,7 +31,7 @@ public sealed class GetUpdateLogsHandler(IAppDbContext db) : IRequestHandler<Get
 
         var logs = await query
             .OrderByDescending(l => l.UpdateTimestamp)
-            .Select(l => new UpdateLogDto(l.UpdateLogId, l.TripId, l.UpdateTimestamp, l.Status))
+            .Select(l => new UpdateLogDto(l.UpdateLogId, l.TripId, l.UpdateTimestamp.ToDateTimeOffset(), l.Status))
             .ToListAsync(cancellationToken);
 
         return Result<List<UpdateLogDto>>.Success(logs);

@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using TripUpdater.Application.Updates.Commands.ProcessTripUpdates;
+using TripUpdater.Domain.Enums;
 using TripUpdater.Tests.Fixtures;
 
 namespace TripUpdater.Tests.Integration;
@@ -14,9 +15,9 @@ public class TripEndpointsIntegrationTests(ApiFixture fixture) : IClassFixture<A
     {
         var request = new ProcessTripUpdatesCommand(
         [
-            new TripUpdateDto(1001, new DateTimeOffset(2026, 7, 29, 8, 31, 0, TimeSpan.Zero)),
-            new TripUpdateDto(1002, new DateTimeOffset(2026, 7, 29, 8, 40, 0, TimeSpan.Zero)),
-            new TripUpdateDto(1003, null)
+            new TripUpdateDto(1001, Status.Ontime, new DateTimeOffset(2026, 7, 29, 8, 31, 0, TimeSpan.Zero)),
+            new TripUpdateDto(1002, Status.Early, new DateTimeOffset(2026, 7, 29, 8, 40, 0, TimeSpan.Zero)),
+            new TripUpdateDto(1003, Status.Cancelled, null)
         ]);
 
         var response = await _client.PostAsJsonAsync("/updates/trips", request, TestContext.Current.CancellationToken);

@@ -1,5 +1,6 @@
 using FluentValidation.TestHelper;
 using TripUpdater.Application.Updates.Commands.ProcessTripUpdates;
+using TripUpdater.Domain.Enums;
 
 namespace TripUpdater.Tests.Unit.Application;
 
@@ -22,8 +23,8 @@ public class ProcessTripUpdatesValidatorTests
     {
         var command = new ProcessTripUpdatesCommand(
         [
-            new TripUpdateDto(1001, DateTimeOffset.UtcNow),
-            new TripUpdateDto(1002, null)
+            new TripUpdateDto(1001, Status.Ontime, DateTimeOffset.UtcNow),
+            new TripUpdateDto(1002, Status.Cancelled, null)
         ]);
 
         var result = _validator.TestValidate(command);

@@ -45,6 +45,7 @@ app.UseExceptionHandler();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    // InMemory provider needs no schema creation; seed restores demo data each run.
     await db.Database.EnsureCreatedAsync();
     SeedData.Seed(db);
 }

@@ -10,7 +10,7 @@ Clean Architecture, single module. Dependencies point inward; the Domain has no 
 src/
   TripUpdater.Domain          # entities, enums, Result, DomainException — pure C#
   TripUpdater.Application     # use cases (commands/queries), validators, Mediator pipeline
-  TripUpdater.Infrastructure  # EF Core, AppDbContext, SQLite, seed data
+  TripUpdater.Infrastructure  # EF Core, AppDbContext, InMemory store, seed data
   TripUpdater.Api             # minimal API endpoints, Swagger, DI composition root
 tests/
   TripUpdater.Tests           # xUnit v3 + WebApplicationFactory
@@ -27,7 +27,7 @@ Dependency direction:
 - **Mediator (source-generated, MIT).** The Mediator source generator produces the `IMediator` implementation and DI registrations at compile time. Handlers are plain `IRequestHandler<TRequest, TResponse>` classes.
 - **FluentValidation pipeline.** A single `ValidationBehavior<TRequest, TResponse>` runs every registered validator before the handler. Failures are converted to `Result.Failure(errors)` and returned to the caller without throwing.
 - **Result pattern.** Expected failures (validation, "trip not found", etc.) are returned as `Result.Failure(...)`, never thrown. The global exception handler is the last line of defense for unexpected exceptions.
-- **EF Core + SQLite (file-based).** `DateTimeOffset` values are stored as `BIGINT` ticks via a value converter so SQLite can `ORDER BY` and index them. The DB file is created and seeded on first start.
+- **EF Core InMemory (mock database).** Volatile store that resets on restart; seed data restores demo state each run. Keeps the `IAppDbContext`/`DbSet<T>`/LINQ seam intact so swapping to a real provider is a one-line change. NodaTime `Instant` is stored as the CLR type directly; on PostgreSQL the Npgsql NodaTime plugin maps it natively to `timestamptz`.
 - **`IAppDbContext` over repository.** No wrapper around `DbSet<T>` — handlers query the DbContext directly.
 - **`IEndpointGroup` auto-discovery.** Every endpoint group implements `IEndpointGroup` and is discovered by `app.MapEndpoints()`. `Program.cs` does not change when new endpoints are added.
 - **Single `Status` enum.** Shared by `Trip` and `UpdateLog` (`Ontime`, `Early`, `Late`, `Cancelled`, `Invalid`).
@@ -66,7 +66,7 @@ http://localhost:5156/swagger
 dotnet test
 ```
 
-The SQLite database file (`tripupdater.db`) is created next to the running API. To start clean, delete it and re-run.
+The API runs against an in-memory database seeded on each start, so state resets every run — no file to manage. To start clean, just restart the API.
 
 ## API
 
@@ -112,9 +112,9 @@ See `docs/api.http` for all three endpoints.
 
 ## Trade-offs
 
-- **SQLite over PostgreSQL.** Keeps the demo zero-dependency. The schema is portable; the value converter on `DateTimeOffset` is the only provider-specific code.
+- **EF Core InMemory over PostgreSQL.** Keeps the demo zero-dependency (no native binaries, no Docker). Trade-off: no relational constraints enforced (unique indexes, FK `OnDelete` are ignored) and state is volatile. The EF configurations stay in place, so a production swap to PostgreSQL is a one-line provider change plus enabling the Npgsql NodaTime plugin — no converter surgery.
 - **Single module.** No bounded contexts; everything lives in one `Application` assembly. Splitting into per-module projects (e.g. `Trips`, `Updates`) would help if the domain grew, but is premature now.
-- **In-process integration tests use a temp SQLite file.** Not `UseInMemoryDatabase` — we use a real SQLite file in `%TEMP%` to match production SQL semantics.
+- **In-process integration tests use the InMemory provider** with a unique database name per fixture instance for isolation. We accept the trade-off that InMemory does not enforce relational constraints; for a demo assignment this keeps the test matrix zero-dependency.
 - **`EnsureCreated` instead of migrations.** Fine for the demo; a real system would use `dotnet ef migrations`.
 
 ## What I would do differently in production
@@ -123,7 +123,7 @@ See `docs/api.http` for all three endpoints.
 - **Rate limiting & output caching.** `AddRateLimiter` on `POST /updates/trips`, `AddOutputCache` on the read endpoints.
 - **Structured logging with Serilog.** Enrichers for `RequestId`, `CorrelationId`, `TraceId`; sinks for console + Seq/AppInsights.
 - **OpenTelemetry.** Tracing + metrics around the Mediator pipeline (the source generator has built-in support).
-- **Real database.** PostgreSQL with `dotnet ef migrations` and idempotent SQL scripts in CI/CD.
+- **Real database.** PostgreSQL with `dotnet ef migrations` and idempotent SQL scripts in CI/CD. The EF Core configurations (unique indexes, FKs) are already in place; `Instant` maps natively to `timestamptz` via the Npgsql NodaTime plugin.
 - **Domain events.** `TripStatusChanged` raised inside `Trip.ApplyUpdate`; handlers react in-process and (via outbox) to a broker.
 - **Docker image.** Multi-stage Dockerfile (or `dotnet publish /t:PublishContainer`) running as a non-root user.
 - **CI/CD.** GitHub Actions: `restore → build → test → format verify → publish container`.

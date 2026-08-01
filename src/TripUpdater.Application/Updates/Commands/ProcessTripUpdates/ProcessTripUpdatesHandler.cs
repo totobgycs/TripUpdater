@@ -1,5 +1,6 @@
 using Mediator;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using TripUpdater.Application.Common.Interfaces;
 using TripUpdater.Domain.Common;
 using TripUpdater.Domain.Entities;
@@ -15,7 +16,7 @@ public sealed class ProcessTripUpdatesHandler(
         ProcessTripUpdatesCommand request,
         CancellationToken cancellationToken)
     {
-        var updateTimestamp = clock.GetUtcNow();
+        var updateTimestamp = Instant.FromDateTimeOffset(clock.GetUtcNow());
         var processedTripIds = new List<int>(request.Updates.Count);
         var counters = new Dictionary<Status, int>
         {
@@ -45,7 +46,11 @@ public sealed class ProcessTripUpdatesHandler(
                 continue;
             }
 
-            trip.ApplyUpdate(update.ActualArrivalTime, updateTimestamp);
+            var actualArrival = update.ActualArrivalTime.HasValue
+                ? Instant.FromDateTimeOffset(update.ActualArrivalTime.Value)
+                : (Instant?)null;
+
+            trip.ApplyUpdate(update.Status, actualArrival, updateTimestamp);
             counters[trip.Status]++;
             processedTripIds.Add(update.TripId);
 

@@ -2,13 +2,17 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using TripUpdater.Infrastructure;
 using TripUpdater.Infrastructure.Persistence;
 
 namespace TripUpdater.Tests.Fixtures;
 
 public sealed class ApiFixture : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private readonly string _dbPath = Path.Combine(Path.GetTempPath(), $"tripupdater-tests-{Guid.NewGuid():N}.db");
+    // Unique in-memory database name per fixture instance — the InMemory store
+    // is keyed by name and shared across all uses of that name within the process,
+    // so a unique name guarantees test isolation.
+    private readonly string _dbName = $"TripUpdater-Test-{Guid.NewGuid():N}";
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -16,6 +20,8 @@ public sealed class ApiFixture : WebApplicationFactory<Program>, IAsyncLifetime
 
         builder.ConfigureServices(services =>
         {
+            // Remove the production AppDbContext registration so we can replace
+            // the in-memory database name with a unique one per fixture.
             var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
             if (descriptor is not null)
             {
@@ -23,7 +29,7 @@ public sealed class ApiFixture : WebApplicationFactory<Program>, IAsyncLifetime
             }
 
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlite($"Data Source={_dbPath}"));
+                options.UseInMemoryDatabase(_dbName));
         });
     }
 
@@ -35,19 +41,5 @@ public sealed class ApiFixture : WebApplicationFactory<Program>, IAsyncLifetime
         SeedData.Seed(db);
     }
 
-    public override async ValueTask DisposeAsync()
-    {
-        await base.DisposeAsync();
-
-        try
-        {
-            if (File.Exists(_dbPath))
-            {
-                File.Delete(_dbPath);
-            }
-        }
-        catch
-        {
-        }
-    }
+    // No file cleanup needed — the InMemory store is GC'd with the fixture.
 }
