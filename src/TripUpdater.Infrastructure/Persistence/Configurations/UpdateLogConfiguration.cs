@@ -22,6 +22,6 @@ internal sealed class UpdateLogConfiguration : IEntityTypeConfiguration<UpdateLo
             .WithMany()
             .HasForeignKey(l => l.TripId)
             .HasPrincipalKey(t => t.TripId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
