@@ -31,7 +31,7 @@ public sealed class GetUpdateLogsHandler(IAppDbContext db) : IRequestHandler<Get
 
         var logs = await query
             .OrderByDescending(l => l.UpdateTimestamp)
-            .Select(l => new UpdateLogDto(l.UpdateLogId, l.TripId, l.UpdateTimestamp.ToDateTimeOffset(), l.Status))
+            .Select(l => new UpdateLogDto(l.Id, l.TripId, l.UpdateTimestamp.ToDateTimeOffset(), l.Status))
             .ToListAsync(cancellationToken);
 
         return Result<List<UpdateLogDto>>.Success(logs);

@@ -14,6 +14,9 @@ public sealed class Trip : Entity
     public Status Status { get; private set; }
     public Line? Line { get; private set; }
 
+    private readonly List<UpdateLog> _updateLogs = [];
+    public IReadOnlyList<UpdateLog> UpdateLogs => _updateLogs.AsReadOnly();
+
     private Trip() { }
 
     public static Trip Create(
@@ -60,6 +63,7 @@ public sealed class Trip : Entity
     {
         ArrivalTime = actualArrivalTime;
         Status = ValidateStatus(reportedStatus, actualArrivalTime);
-        _ = updateTimestamp;
+
+        _updateLogs.Add(UpdateLog.Create(updateTimestamp, Status, this));
     }
 }
