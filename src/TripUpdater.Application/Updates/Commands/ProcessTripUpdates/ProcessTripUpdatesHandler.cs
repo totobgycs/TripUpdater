@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using TripUpdater.Application.Common.Interfaces;
 using TripUpdater.Domain.Common;
-using TripUpdater.Domain.Entities;
 using TripUpdater.Domain.Enums;
 
 namespace TripUpdater.Application.Updates.Commands.ProcessTripUpdates;
@@ -33,10 +32,6 @@ public sealed class ProcessTripUpdatesHandler(
             .ToListAsync(cancellationToken);
         var tripsById = existingTrips.ToDictionary(t => t.TripId);
 
-        var maxUpdateLogId = await db.UpdateLogs.AnyAsync(cancellationToken)
-            ? await db.UpdateLogs.MaxAsync(l => l.UpdateLogId, cancellationToken)
-            : 0;
-
         foreach (var update in request.Updates)
         {
             if (!tripsById.TryGetValue(update.TripId, out var trip))
@@ -53,9 +48,6 @@ public sealed class ProcessTripUpdatesHandler(
             trip.ApplyUpdate(update.Status, actualArrival, updateTimestamp);
             counters[trip.Status]++;
             processedTripIds.Add(update.TripId);
-
-            var log = UpdateLog.Create(++maxUpdateLogId, trip.TripId, updateTimestamp, trip.Status, trip);
-            db.UpdateLogs.Add(log);
         }
 
         await db.SaveChangesAsync(cancellationToken);

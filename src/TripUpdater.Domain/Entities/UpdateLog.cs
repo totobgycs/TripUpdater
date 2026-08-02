@@ -6,7 +6,6 @@ namespace TripUpdater.Domain.Entities;
 
 public sealed class UpdateLog : Entity
 {
-    public int UpdateLogId { get; private set; }
     public int TripId { get; private set; }
     public Instant UpdateTimestamp { get; private set; }
     public Status Status { get; private set; }
@@ -14,11 +13,9 @@ public sealed class UpdateLog : Entity
 
     private UpdateLog() { }
 
-    public static UpdateLog Create(int updateLogId, int tripId, Instant updateTimestamp, Status status, Trip trip) => new()
+    public static UpdateLog Create(Instant updateTimestamp, Status status, Trip trip) => new()
     {
-        Id = Guid.NewGuid(),
-        UpdateLogId = updateLogId,
-        TripId = tripId,
+        TripId = trip.TripId,
         UpdateTimestamp = updateTimestamp,
         Status = status,
         Trip = trip

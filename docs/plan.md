@@ -55,7 +55,7 @@ ELSE:
 - **Entities:**
   - `Trip` (TripId, LineNo, DepartureTime, OriginalArrivalTime, ArrivalTime, Status) — with `CalculateStatus()` method
   - `Line` (LineId, OperatorNo, LinePlanningNumber) — simple entity
-  - `UpdateLog` (UpdateLogId, TripId, UpdateTimestamp, Status) — FK to Trip
+  - `UpdateLog` (TripId, UpdateTimestamp, Status) — FK to Trip, child entity owned by Trip aggregate
   - `Operator` — stub entity (minimal: OperatorNo, Name)
 - **Enums:**
   - `Status` (Ontime, Early, Late, Cancelled, Invalid) — single enum for both Trip and UpdateLog
