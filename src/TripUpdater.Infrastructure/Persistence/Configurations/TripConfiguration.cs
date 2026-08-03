@@ -10,19 +10,21 @@ internal sealed class TripConfiguration : IEntityTypeConfiguration<Trip>
     {
         builder.ToTable("Trips");
         builder.HasKey(t => t.Id);
-        builder.Property(t => t.TripId).IsRequired();
+        builder.Property(t => t.TripNo).IsRequired();
+        builder.Property(t => t.LineId).IsRequired();
         builder.Property(t => t.LineNo).IsRequired();
         builder.Property(t => t.DepartureTime).IsRequired();
         builder.Property(t => t.OriginalArrivalTime).IsRequired();
         builder.Property(t => t.ArrivalTime);
         builder.Property(t => t.Status).HasConversion<string>().HasMaxLength(20);
-        builder.HasIndex(t => t.TripId).IsUnique();
+        builder.HasIndex(t => t.TripNo).IsUnique();
         builder.HasIndex(t => t.DepartureTime);
+        builder.HasIndex(t => t.LineId);
+        builder.HasIndex(t => t.LineNo);
 
         builder.HasOne(t => t.Line)
             .WithMany()
-            .HasForeignKey(t => t.LineNo)
-            .HasPrincipalKey(l => l.LineId)
+            .HasForeignKey(t => t.LineId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

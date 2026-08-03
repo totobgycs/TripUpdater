@@ -10,15 +10,17 @@ internal sealed class LineConfiguration : IEntityTypeConfiguration<Line>
     {
         builder.ToTable("Lines");
         builder.HasKey(l => l.Id);
-        builder.Property(l => l.LineId).IsRequired();
+        builder.Property(l => l.LineNo).IsRequired();
+        builder.Property(l => l.OperatorId).IsRequired();
         builder.Property(l => l.OperatorNo).IsRequired().HasMaxLength(50);
         builder.Property(l => l.LinePlanningNumber).IsRequired().HasMaxLength(100);
-        builder.HasIndex(l => l.LineId).IsUnique();
+        builder.HasIndex(l => l.LineNo).IsUnique();
+        builder.HasIndex(l => l.OperatorId);
+        builder.HasIndex(l => l.OperatorNo);
 
         builder.HasOne(l => l.Operator)
             .WithMany()
-            .HasForeignKey(l => l.OperatorNo)
-            .HasPrincipalKey(o => o.OperatorNo)
+            .HasForeignKey(l => l.OperatorId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

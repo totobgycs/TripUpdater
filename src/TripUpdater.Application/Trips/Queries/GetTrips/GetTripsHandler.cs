@@ -32,7 +32,8 @@ public sealed class GetTripsHandler(IAppDbContext db) : IRequestHandler<GetTrips
         var trips = await query
             .OrderBy(t => t.DepartureTime)
             .Select(t => new TripDto(
-                t.TripId,
+                t.TripNo,
+                t.LineId,
                 t.LineNo,
                 t.DepartureTime.ToDateTimeOffset(),
                 t.OriginalArrivalTime.ToDateTimeOffset(),

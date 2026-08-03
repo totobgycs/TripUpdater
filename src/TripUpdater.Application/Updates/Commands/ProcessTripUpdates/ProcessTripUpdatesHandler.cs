@@ -29,13 +29,9 @@ public sealed class ProcessTripUpdatesHandler(
 
         var tripIds = request.Updates.Select(u => u.TripId).Distinct().ToList();
         var existingTrips = await db.Trips
-            .Where(t => tripIds.Contains(t.TripId))
+            .Where(t => tripIds.Contains(t.TripNo))
             .ToListAsync(cancellationToken);
-        var tripsById = existingTrips.ToDictionary(t => t.TripId);
-
-        var maxUpdateLogId = await db.UpdateLogs.AnyAsync(cancellationToken)
-            ? await db.UpdateLogs.MaxAsync(l => l.UpdateLogId, cancellationToken)
-            : 0;
+        var tripsById = existingTrips.ToDictionary(t => t.TripNo);
 
         foreach (var update in request.Updates)
         {
@@ -50,11 +46,11 @@ public sealed class ProcessTripUpdatesHandler(
                 ? Instant.FromDateTimeOffset(update.ActualArrivalTime.Value)
                 : (Instant?)null;
 
-            trip.ApplyUpdate(update.Status, actualArrival, updateTimestamp);
+            trip.ApplyUpdate(actualArrival);
             counters[trip.Status]++;
             processedTripIds.Add(update.TripId);
 
-            var log = UpdateLog.Create(++maxUpdateLogId, trip.TripId, updateTimestamp, trip.Status, trip);
+            var log = UpdateLog.Create(trip.Id, trip.TripNo, updateTimestamp, trip.Status, trip);
             db.UpdateLogs.Add(log);
         }
 

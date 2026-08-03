@@ -3,7 +3,8 @@ using TripUpdater.Domain.Enums;
 namespace TripUpdater.Application.UpdateLogs.Queries.GetUpdateLogs;
 
 public sealed record UpdateLogDto(
-    int UpdateLogId,
-    int TripId,
+    Guid Id,
+    Guid TripId,
+    int TripNo,
     DateTimeOffset UpdateTimestamp,
     Status Status);

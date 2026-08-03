@@ -10,92 +10,122 @@ public class TripStatusCalculationTests
     private static readonly Instant OriginalArrival = Instant.FromUtc(2026, 7, 29, 8, 30, 0);
 
     [Fact]
-    public void ValidateStatus_Cancelled_AcceptsAnything()
+    public void CalculateStatus_NullArrival_ReturnsCancelled()
     {
-        var trip = Trip.Create(1, 1, Departure, OriginalArrival);
+        // Arrange
+        var trip = Trip.Create(1, Departure, OriginalArrival, CreateLine());
 
-        var status = trip.ValidateStatus(Status.Cancelled, null);
+        // Act
+        var status = trip.CalculateStatus(null);
 
+        // Assert
         Assert.Equal(Status.Cancelled, status);
     }
 
     [Fact]
-    public void ValidateStatus_Invalid_AcceptsAnything()
+    public void CalculateStatus_ExactArrival_ReturnsOntime()
     {
-        var trip = Trip.Create(1, 1, Departure, OriginalArrival);
+        // Arrange
+        var trip = Trip.Create(1, Departure, OriginalArrival, CreateLine());
 
-        var status = trip.ValidateStatus(Status.Invalid, OriginalArrival);
+        // Act
+        var status = trip.CalculateStatus(OriginalArrival);
 
-        Assert.Equal(Status.Invalid, status);
-    }
-
-    [Fact]
-    public void ValidateStatus_OntimeWithoutArrival_ReturnsInvalid()
-    {
-        var trip = Trip.Create(1, 1, Departure, OriginalArrival);
-
-        var status = trip.ValidateStatus(Status.Ontime, null);
-
-        Assert.Equal(Status.Invalid, status);
-    }
-
-    [Fact]
-    public void ValidateStatus_OntimeWithinTwoMinutes_ReturnsOntime()
-    {
-        var trip = Trip.Create(1, 1, Departure, OriginalArrival);
-
-        var status = trip.ValidateStatus(Status.Ontime, OriginalArrival + Duration.FromSeconds(90));
-
+        // Assert
         Assert.Equal(Status.Ontime, status);
     }
 
     [Fact]
-    public void ValidateStatus_OntimeTooLate_ReturnsInvalid()
+    public void CalculateStatus_ArrivalEarlyWithinTwoMinutes_ReturnsOntime()
     {
-        var trip = Trip.Create(1, 1, Departure, OriginalArrival);
+        // Arrange
+        var trip = Trip.Create(1, Departure, OriginalArrival, CreateLine());
 
-        var status = trip.ValidateStatus(Status.Ontime, OriginalArrival + Duration.FromMinutes(7));
+        // Act
+        var status = trip.CalculateStatus(OriginalArrival - Duration.FromSeconds(90));
 
-        Assert.Equal(Status.Invalid, status);
+        // Assert
+        Assert.Equal(Status.Ontime, status);
     }
 
     [Fact]
-    public void ValidateStatus_EarlyMoreThanTwoMinutes_ReturnsEarly()
+    public void CalculateStatus_ArrivalExactlyTwoMinutesEarly_ReturnsEarly()
     {
-        var trip = Trip.Create(1, 1, Departure, OriginalArrival);
+        // Arrange
+        var trip = Trip.Create(1, Departure, OriginalArrival, CreateLine());
 
-        var status = trip.ValidateStatus(Status.Early, OriginalArrival - Duration.FromMinutes(5));
+        // Act
+        var status = trip.CalculateStatus(OriginalArrival - Duration.FromMinutes(2));
 
+        // Assert
         Assert.Equal(Status.Early, status);
     }
 
     [Fact]
-    public void ValidateStatus_EarlyWithinTwoMinutes_ReturnsInvalid()
+    public void CalculateStatus_ArrivalEarlyMoreThanTwoMinutes_ReturnsEarly()
     {
-        var trip = Trip.Create(1, 1, Departure, OriginalArrival);
+        // Arrange
+        var trip = Trip.Create(1, Departure, OriginalArrival, CreateLine());
 
-        var status = trip.ValidateStatus(Status.Early, OriginalArrival - Duration.FromSeconds(90));
+        // Act
+        var status = trip.CalculateStatus(OriginalArrival - Duration.FromMinutes(5));
 
-        Assert.Equal(Status.Invalid, status);
+        // Assert
+        Assert.Equal(Status.Early, status);
     }
 
     [Fact]
-    public void ValidateStatus_LateMoreThanTwoMinutes_ReturnsLate()
+    public void CalculateStatus_ArrivalLateWithinTwoMinutes_ReturnsOntime()
     {
-        var trip = Trip.Create(1, 1, Departure, OriginalArrival);
+        // Arrange
+        var trip = Trip.Create(1, Departure, OriginalArrival, CreateLine());
 
-        var status = trip.ValidateStatus(Status.Late, OriginalArrival + Duration.FromMinutes(7));
+        // Act
+        var status = trip.CalculateStatus(OriginalArrival + Duration.FromSeconds(90));
 
+        // Assert
+        Assert.Equal(Status.Ontime, status);
+    }
+
+    [Fact]
+    public void CalculateStatus_ArrivalExactlyTwoMinutesLate_ReturnsLate()
+    {
+        // Arrange
+        var trip = Trip.Create(1, Departure, OriginalArrival, CreateLine());
+
+        // Act
+        var status = trip.CalculateStatus(OriginalArrival + Duration.FromMinutes(2));
+
+        // Assert
         Assert.Equal(Status.Late, status);
     }
 
     [Fact]
-    public void ValidateStatus_LateWithinTwoMinutes_ReturnsInvalid()
+    public void CalculateStatus_ArrivalLateMoreThanTwoMinutes_ReturnsLate()
     {
-        var trip = Trip.Create(1, 1, Departure, OriginalArrival);
+        // Arrange
+        var trip = Trip.Create(1, Departure, OriginalArrival, CreateLine());
 
-        var status = trip.ValidateStatus(Status.Late, OriginalArrival + Duration.FromSeconds(90));
+        // Act
+        var status = trip.CalculateStatus(OriginalArrival + Duration.FromMinutes(7));
 
-        Assert.Equal(Status.Invalid, status);
+        // Assert
+        Assert.Equal(Status.Late, status);
     }
+
+    [Fact]
+    public void CalculateStatus_WhenAlreadyCancelled_ReturnsCancelled()
+    {
+        // Arrange — a cancelled trip is terminal: a later arrival must not resurrect it.
+        var trip = Trip.Create(1, Departure, OriginalArrival, CreateLine());
+        trip.ApplyUpdate(null);
+
+        // Act
+        var status = trip.CalculateStatus(OriginalArrival);
+
+        // Assert
+        Assert.Equal(Status.Cancelled, status);
+    }
+
+    private static Line CreateLine() => Line.Create(1, Guid.NewGuid(), "OP123", "LP456");
 }

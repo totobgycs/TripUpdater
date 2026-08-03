@@ -47,5 +47,5 @@ public class TripEndpointsIntegrationTests(ApiFixture fixture) : IClassFixture<A
     }
 
     private sealed record ResultEnvelope<T>(bool IsSuccess, T? Value, IReadOnlyList<object>? Errors);
-    private sealed record TripDto(int TripId, int LineNo, DateTimeOffset DepartureTime, DateTimeOffset OriginalArrivalTime, DateTimeOffset? ArrivalTime, int Status);
+    private sealed record TripDto(int TripId, Guid LineId, int LineNo, DateTimeOffset DepartureTime, DateTimeOffset OriginalArrivalTime, DateTimeOffset? ArrivalTime, int Status);
 }
