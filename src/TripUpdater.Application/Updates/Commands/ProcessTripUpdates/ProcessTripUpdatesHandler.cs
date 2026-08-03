@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using TripUpdater.Application.Common.Interfaces;
 using TripUpdater.Domain.Common;
-using TripUpdater.Domain.Entities;
 using TripUpdater.Domain.Enums;
 
 namespace TripUpdater.Application.Updates.Commands.ProcessTripUpdates;
@@ -49,9 +48,6 @@ public sealed class ProcessTripUpdatesHandler(
             trip.ApplyUpdate(actualArrival);
             counters[trip.Status]++;
             processedTripIds.Add(update.TripId);
-
-            var log = UpdateLog.Create(trip.Id, trip.TripNo, updateTimestamp, trip.Status, trip);
-            db.UpdateLogs.Add(log);
         }
 
         await db.SaveChangesAsync(cancellationToken);

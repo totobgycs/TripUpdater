@@ -14,11 +14,10 @@ public sealed class UpdateLog : Entity
 
     private UpdateLog() { }
 
-    public static UpdateLog Create(Guid tripId, int tripNo, Instant updateTimestamp, Status status, Trip trip) => new()
+    public static UpdateLog Create(Instant updateTimestamp, Status status, Trip trip) => new()
     {
-        Id = Guid.NewGuid(),
-        TripId = tripId,
-        TripNo = tripNo,
+        TripId = trip.Id,
+        TripNo = trip.TripNo,
         UpdateTimestamp = updateTimestamp,
         Status = status,
         Trip = trip

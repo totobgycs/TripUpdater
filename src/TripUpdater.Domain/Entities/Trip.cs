@@ -15,6 +15,9 @@ public sealed class Trip : Entity
     public Status Status { get; private set; }
     public Line Line { get; private set; }
 
+    private readonly List<UpdateLog> _updateLogs = [];
+    public IReadOnlyList<UpdateLog> UpdateLogs => _updateLogs.AsReadOnly();
+
     private Trip() { Line = null!; }
 
     public static Trip Create(
@@ -23,7 +26,6 @@ public sealed class Trip : Entity
         Instant originalArrival,
         Line line) => new()
         {
-            Id = Guid.NewGuid(),
             TripNo = tripNo,
             LineId = line.Id,
             LineNo = line.LineNo,
@@ -47,6 +49,11 @@ public sealed class Trip : Entity
             return Status.Cancelled;
         }
 
+        if (actualArrivalTime.Value < DepartureTime)
+        {
+            return Status.Invalid;
+        }
+
         var diff = (actualArrivalTime.Value - OriginalArrivalTime).TotalMinutes;
 
         return diff switch
@@ -61,5 +68,7 @@ public sealed class Trip : Entity
     {
         ArrivalTime = actualArrivalTime;
         Status = CalculateStatus(actualArrivalTime);
+
+        _updateLogs.Add(UpdateLog.Create(Instant.FromDateTimeUtc(DateTime.UtcNow), Status, this));
     }
 }

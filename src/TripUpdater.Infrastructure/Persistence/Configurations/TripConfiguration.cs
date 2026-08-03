@@ -26,5 +26,13 @@ internal sealed class TripConfiguration : IEntityTypeConfiguration<Trip>
             .WithMany()
             .HasForeignKey(t => t.LineId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(t => t.UpdateLogs)
+            .WithOne(l => l.Trip)
+            .HasForeignKey(l => l.TripId)
+            .HasPrincipalKey(t => t.Id)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(t => t.UpdateLogs).AutoInclude(false);
     }
 }

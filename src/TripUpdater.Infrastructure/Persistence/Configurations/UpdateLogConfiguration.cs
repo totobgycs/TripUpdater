@@ -17,10 +17,5 @@ internal sealed class UpdateLogConfiguration : IEntityTypeConfiguration<UpdateLo
         builder.HasIndex(l => l.TripId);
         builder.HasIndex(l => l.TripNo);
         builder.HasIndex(l => l.UpdateTimestamp);
-
-        builder.HasOne(l => l.Trip)
-            .WithMany()
-            .HasForeignKey(l => l.TripId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 }
