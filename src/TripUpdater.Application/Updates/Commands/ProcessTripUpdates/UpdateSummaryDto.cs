@@ -2,9 +2,5 @@ namespace TripUpdater.Application.Updates.Commands.ProcessTripUpdates;
 
 public sealed record UpdateSummaryDto(
     int TotalUpdates,
-    int Ontime,
-    int Early,
-    int Late,
-    int Cancelled,
-    int Invalid,
-    List<int> ProcessedTripIds);
+    List<int> ProcessedTripIds,
+    List<TripUpdateDto> UnprocessedUpdates);

@@ -9,17 +9,21 @@ public sealed class UpdateLog : Entity
     public Guid TripId { get; private set; }
     public int TripNo { get; private set; }
     public Instant UpdateTimestamp { get; private set; }
-    public Status Status { get; private set; }
+    public Status PreviousStatus { get; private set; }
+    public Instant? PreviousArrivalTime { get; private set; }
+    public Instant PreviousDepartureTime { get; private set; }
     public Trip Trip { get; private set; } = null!;
 
     private UpdateLog() { }
 
-    public static UpdateLog Create(Instant updateTimestamp, Status status, Trip trip) => new()
+    public static UpdateLog Create(Instant updateTimestamp, Trip trip) => new()
     {
         TripId = trip.Id,
         TripNo = trip.TripNo,
         UpdateTimestamp = updateTimestamp,
-        Status = status,
+        PreviousStatus = trip.Status,
+        PreviousArrivalTime = trip.ArrivalTime,
+        PreviousDepartureTime = trip.DepartureTime,
         Trip = trip
     };
 }

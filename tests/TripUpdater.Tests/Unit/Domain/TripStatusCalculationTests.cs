@@ -114,17 +114,58 @@ public class TripStatusCalculationTests
     }
 
     [Fact]
+    public void CalculateStatus_ArrivalBeforeDeparture_ReturnsInvalid()
+    {
+        // Arrange
+        var trip = Trip.Create(1, Departure, OriginalArrival, CreateLine());
+
+        // Act
+        var status = trip.CalculateStatus(Departure - Duration.FromMinutes(1));
+
+        // Assert
+        Assert.Equal(Status.Invalid, status);
+    }
+
+    [Fact]
+    public void CalculateStatus_ArrivalAtDeparture_ReturnsEarly()
+    {
+        // Arrange — boundary: arrival equal to departure is valid (check is <, not <=).
+        //           diff = -30 min, well beyond the -2 min Early threshold.
+        var trip = Trip.Create(1, Departure, OriginalArrival, CreateLine());
+
+        // Act
+        var status = trip.CalculateStatus(Departure);
+
+        // Assert
+        Assert.Equal(Status.Early, status);
+    }
+
+    [Fact]
     public void CalculateStatus_WhenAlreadyCancelled_ReturnsCancelled()
     {
         // Arrange — a cancelled trip is terminal: a later arrival must not resurrect it.
         var trip = Trip.Create(1, Departure, OriginalArrival, CreateLine());
-        trip.ApplyUpdate(null);
+        trip.ApplyUpdate(null, null);
 
         // Act
         var status = trip.CalculateStatus(OriginalArrival);
 
         // Assert
         Assert.Equal(Status.Cancelled, status);
+    }
+
+    [Fact]
+    public void CalculateStatus_WhenAlreadyInvalid_ReturnsInvalid()
+    {
+        // Arrange — an invalid trip is terminal: a later valid arrival must not resurrect it.
+        var trip = Trip.Create(1, Departure, OriginalArrival, CreateLine());
+        trip.ApplyUpdate(null, Departure - Duration.FromMinutes(1));
+
+        // Act
+        var status = trip.CalculateStatus(OriginalArrival);
+
+        // Assert
+        Assert.Equal(Status.Invalid, status);
     }
 
     private static Line CreateLine() => Line.Create(1, Guid.NewGuid(), "OP123", "LP456");

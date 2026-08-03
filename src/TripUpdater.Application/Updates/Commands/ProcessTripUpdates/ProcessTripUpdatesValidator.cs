@@ -26,11 +26,16 @@ public sealed class ProcessTripUpdatesValidator : AbstractValidator<ProcessTripU
                 update.RuleFor(u => u.TripId)
                     .GreaterThan(0)
                     .WithMessage("TripId must be positive.");
-
-                update.RuleFor(u => u.Status)
-                    .IsInEnum()
-                    .Must(s => ValidStatuses.Contains(s))
-                    .WithMessage("Status must be a valid trip status.");
+                update.RuleFor(u => u.DepartureTime)
+                    .Must(dt => dt is null || dt.Value > DateTimeOffset.MinValue)
+                    .WithMessage("DepartureTime must be a valid date.");
+                update.RuleFor(u => u.ActualArrivalTime)
+                    .Must(dt => dt is null || dt.Value > DateTimeOffset.MinValue)
+                    .WithMessage("ActualArrivalTime must be a valid date.");
+                update.RuleFor(u => u)
+                    .Must(u => u.DepartureTime is null || u.ActualArrivalTime is null || u.ActualArrivalTime.Value > u.DepartureTime.Value)
+                    .WithMessage("ActualArrivalTime must be greater than DepartureTime.")
+                    .WithName("ActualArrivalTime");
             });
     }
 }

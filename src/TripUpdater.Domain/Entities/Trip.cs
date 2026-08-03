@@ -64,11 +64,13 @@ public sealed class Trip : Entity
         };
     }
 
-    public void ApplyUpdate(Instant? actualArrivalTime)
+    public void ApplyUpdate(Instant? departureTime, Instant? actualArrivalTime)
     {
+        var updateLog = UpdateLog.Create(Instant.FromDateTimeUtc(DateTime.UtcNow), this);
+        DepartureTime = departureTime ?? DepartureTime;
         ArrivalTime = actualArrivalTime;
         Status = CalculateStatus(actualArrivalTime);
 
-        _updateLogs.Add(UpdateLog.Create(Instant.FromDateTimeUtc(DateTime.UtcNow), Status, this));
+        _updateLogs.Add(updateLog);
     }
 }

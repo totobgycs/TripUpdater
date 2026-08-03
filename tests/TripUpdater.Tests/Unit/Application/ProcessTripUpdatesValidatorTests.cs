@@ -23,8 +23,9 @@ public class ProcessTripUpdatesValidatorTests
     {
         var command = new ProcessTripUpdatesCommand(
         [
-            new TripUpdateDto(1001, Status.Ontime, DateTimeOffset.UtcNow),
-            new TripUpdateDto(1002, Status.Cancelled, null)
+            new TripUpdateDto(1001, DateTimeOffset.UtcNow - TimeSpan.FromMinutes(5), DateTimeOffset.UtcNow),
+            new TripUpdateDto(1002, DateTimeOffset.UtcNow - TimeSpan.FromMinutes(10), null),
+            new TripUpdateDto(1002, null, null)
         ]);
 
         var result = _validator.TestValidate(command);

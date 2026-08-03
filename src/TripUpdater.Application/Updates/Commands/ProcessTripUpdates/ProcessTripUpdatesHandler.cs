@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using TripUpdater.Application.Common.Interfaces;
 using TripUpdater.Domain.Common;
-using TripUpdater.Domain.Enums;
 
 namespace TripUpdater.Application.Updates.Commands.ProcessTripUpdates;
 
@@ -17,14 +16,7 @@ public sealed class ProcessTripUpdatesHandler(
     {
         var updateTimestamp = Instant.FromDateTimeOffset(clock.GetUtcNow());
         var processedTripIds = new List<int>(request.Updates.Count);
-        var counters = new Dictionary<Status, int>
-        {
-            [Status.Ontime] = 0,
-            [Status.Early] = 0,
-            [Status.Late] = 0,
-            [Status.Cancelled] = 0,
-            [Status.Invalid] = 0
-        };
+        var unprocessedUpdates = new List<TripUpdateDto>();
 
         var tripIds = request.Updates.Select(u => u.TripId).Distinct().ToList();
         var existingTrips = await db.Trips
@@ -36,17 +28,14 @@ public sealed class ProcessTripUpdatesHandler(
         {
             if (!tripsById.TryGetValue(update.TripId, out var trip))
             {
-                counters[Status.Invalid]++;
-                processedTripIds.Add(update.TripId);
+                unprocessedUpdates.Add(update);
                 continue;
             }
 
-            var actualArrival = update.ActualArrivalTime.HasValue
-                ? Instant.FromDateTimeOffset(update.ActualArrivalTime.Value)
-                : (Instant?)null;
+            var departureTime = GetInstant(update.DepartureTime);
+            var actualArrivalTime = GetInstant(update.ActualArrivalTime);
 
-            trip.ApplyUpdate(actualArrival);
-            counters[trip.Status]++;
+            trip.ApplyUpdate(departureTime, actualArrivalTime);
             processedTripIds.Add(update.TripId);
         }
 
@@ -54,13 +43,16 @@ public sealed class ProcessTripUpdatesHandler(
 
         var summary = new UpdateSummaryDto(
             TotalUpdates: request.Updates.Count,
-            Ontime: counters[Status.Ontime],
-            Early: counters[Status.Early],
-            Late: counters[Status.Late],
-            Cancelled: counters[Status.Cancelled],
-            Invalid: counters[Status.Invalid],
-            ProcessedTripIds: processedTripIds);
+            ProcessedTripIds: processedTripIds,
+            UnprocessedUpdates: unprocessedUpdates);
 
         return Result<UpdateSummaryDto>.Success(summary);
+
+        static Instant? GetInstant(DateTimeOffset? dateTimeOffset)
+        {
+            return dateTimeOffset.HasValue
+                ? Instant.FromDateTimeOffset(dateTimeOffset.Value)
+                : (Instant?)null;
+        }
     }
 }
