@@ -11,7 +11,6 @@ public sealed class Operator : Entity
 
     public static Operator Create(string operatorNo, string name) => new()
     {
-        Id = Guid.NewGuid(),
         OperatorNo = operatorNo,
         Name = name
     };

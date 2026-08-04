@@ -168,5 +168,5 @@ public class TripStatusCalculationTests
         Assert.Equal(Status.Invalid, status);
     }
 
-    private static Line CreateLine() => Line.Create(1, Guid.NewGuid(), "OP123", "LP456");
+    private static Line CreateLine() => Line.Create(1, 1, "OP123", "LP456");
 }

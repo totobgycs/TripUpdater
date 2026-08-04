@@ -10,6 +10,7 @@ internal sealed class UpdateLogConfiguration : IEntityTypeConfiguration<UpdateLo
     {
         builder.ToTable("UpdateLogs");
         builder.HasKey(l => l.Id);
+        builder.Property(l => l.Id).ValueGeneratedOnAdd();
         builder.Property(l => l.TripId).IsRequired();
         builder.Property(l => l.TripNo).IsRequired();
         builder.Property(l => l.UpdateTimestamp).IsRequired();

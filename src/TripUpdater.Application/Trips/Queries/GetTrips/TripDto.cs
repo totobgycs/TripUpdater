@@ -4,7 +4,7 @@ namespace TripUpdater.Application.Trips.Queries.GetTrips;
 
 public sealed record TripDto(
     int TripId,
-    Guid LineId,
+    long LineId,
     int LineNo,
     DateTimeOffset DepartureTime,
     DateTimeOffset OriginalArrivalTime,

@@ -10,6 +10,7 @@ internal sealed class LineConfiguration : IEntityTypeConfiguration<Line>
     {
         builder.ToTable("Lines");
         builder.HasKey(l => l.Id);
+        builder.Property(l => l.Id).ValueGeneratedOnAdd();
         builder.Property(l => l.LineNo).IsRequired();
         builder.Property(l => l.OperatorId).IsRequired();
         builder.Property(l => l.OperatorNo).IsRequired().HasMaxLength(50);

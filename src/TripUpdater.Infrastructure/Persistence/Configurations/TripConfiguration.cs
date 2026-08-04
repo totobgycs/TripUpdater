@@ -10,6 +10,7 @@ internal sealed class TripConfiguration : IEntityTypeConfiguration<Trip>
     {
         builder.ToTable("Trips");
         builder.HasKey(t => t.Id);
+        builder.Property(t => t.Id).ValueGeneratedOnAdd();
         builder.Property(t => t.TripNo).IsRequired();
         builder.Property(t => t.LineId).IsRequired();
         builder.Property(t => t.LineNo).IsRequired();

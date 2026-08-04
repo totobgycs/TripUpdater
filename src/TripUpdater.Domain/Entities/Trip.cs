@@ -7,7 +7,7 @@ namespace TripUpdater.Domain.Entities;
 public sealed class Trip : Entity
 {
     public int TripNo { get; private set; }
-    public Guid LineId { get; private set; }
+    public long LineId { get; private set; }
     public int LineNo { get; private set; }
     public Instant DepartureTime { get; private set; }
     public Instant OriginalArrivalTime { get; private set; }

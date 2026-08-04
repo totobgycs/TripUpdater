@@ -10,6 +10,7 @@ internal sealed class OperatorConfiguration : IEntityTypeConfiguration<Operator>
     {
         builder.ToTable("Operators");
         builder.HasKey(o => o.Id);
+        builder.Property(o => o.Id).ValueGeneratedOnAdd();
         builder.Property(o => o.OperatorNo).IsRequired().HasMaxLength(50);
         builder.Property(o => o.Name).IsRequired().HasMaxLength(200);
         builder.HasIndex(o => o.OperatorNo).IsUnique();
