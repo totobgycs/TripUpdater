@@ -32,10 +32,6 @@ public sealed class ProcessTripUpdatesValidator : AbstractValidator<ProcessTripU
                 update.RuleFor(u => u.ActualArrivalTime)
                     .Must(dt => dt is null || dt.Value > DateTimeOffset.MinValue)
                     .WithMessage("ActualArrivalTime must be a valid date.");
-                update.RuleFor(u => u)
-                    .Must(u => u.DepartureTime is null || u.ActualArrivalTime is null || u.ActualArrivalTime.Value > u.DepartureTime.Value)
-                    .WithMessage("ActualArrivalTime must be greater than DepartureTime.")
-                    .WithName("ActualArrivalTime");
             });
     }
 }

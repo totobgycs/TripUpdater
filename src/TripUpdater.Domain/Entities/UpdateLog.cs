@@ -10,8 +10,8 @@ public sealed class UpdateLog : Entity
     public int TripNo { get; private set; }
     public Instant UpdateTimestamp { get; private set; }
     public Status PreviousStatus { get; private set; }
-    public Instant? PreviousArrivalTime { get; private set; }
     public Instant PreviousDepartureTime { get; private set; }
+    public Instant? PreviousArrivalTime { get; private set; }
     public Trip Trip { get; private set; } = null!;
 
     private UpdateLog() { }

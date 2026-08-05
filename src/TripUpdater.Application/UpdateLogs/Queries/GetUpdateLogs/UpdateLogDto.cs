@@ -7,4 +7,6 @@ public sealed record UpdateLogDto(
     long TripId,
     int TripNo,
     DateTimeOffset UpdateTimestamp,
-    Status Status);
+    DateTimeOffset PreviousDepartureTime,
+    DateTimeOffset? PreviousArrivalTime,
+    Status PreviousStatus);

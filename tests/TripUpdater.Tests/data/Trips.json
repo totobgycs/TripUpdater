@@ -1,0 +1,79 @@
+{
+  "value": [
+    {
+      "tripId": 1001,
+      "lineId": 1,
+      "lineNo": 1,
+      "departureTime": "2026-07-29T08:00:00+00:00",
+      "originalArrivalTime": "2026-07-29T08:30:00+00:00",
+      "arrivalTime": "2026-07-29T08:30:00+00:00",
+      "status": 0
+    },
+    {
+      "tripId": 1002,
+      "lineId": 1,
+      "lineNo": 1,
+      "departureTime": "2026-07-29T08:15:00+00:00",
+      "originalArrivalTime": "2026-07-29T08:45:00+00:00",
+      "arrivalTime": "2026-07-29T08:45:00+00:00",
+      "status": 0
+    },
+    {
+      "tripId": 1003,
+      "lineId": 1,
+      "lineNo": 1,
+      "departureTime": "2026-07-29T08:30:00+00:00",
+      "originalArrivalTime": "2026-07-29T09:00:00+00:00",
+      "arrivalTime": "2026-07-29T09:00:00+00:00",
+      "status": 0
+    },
+    {
+      "tripId": 1004,
+      "lineId": 2,
+      "lineNo": 2,
+      "departureTime": "2026-07-29T09:00:00+00:00",
+      "originalArrivalTime": "2026-07-29T09:25:00+00:00",
+      "arrivalTime": "2026-07-29T09:25:00+00:00",
+      "status": 0
+    },
+    {
+      "tripId": 1005,
+      "lineId": 3,
+      "lineNo": 3,
+      "departureTime": "2026-07-29T10:00:00+00:00",
+      "originalArrivalTime": "2026-07-29T10:40:00+00:00",
+      "arrivalTime": "2026-07-29T10:40:00+00:00",
+      "status": 0
+    },
+    {
+      "tripId": 1006,
+      "lineId": 4,
+      "lineNo": 4,
+      "departureTime": "2026-07-29T11:00:00+00:00",
+      "originalArrivalTime": "2026-07-29T11:20:00+00:00",
+      "arrivalTime": "2026-07-29T11:20:00+00:00",
+      "status": 0
+    },
+    {
+      "tripId": 1007,
+      "lineId": 1,
+      "lineNo": 1,
+      "departureTime": "2026-07-29T12:00:00+00:00",
+      "originalArrivalTime": "2026-07-29T12:30:00+00:00",
+      "arrivalTime": "2026-07-29T12:30:00+00:00",
+      "status": 0
+    },
+    {
+      "tripId": 1008,
+      "lineId": 2,
+      "lineNo": 2,
+      "departureTime": "2026-07-29T13:00:00+00:00",
+      "originalArrivalTime": "2026-07-29T13:25:00+00:00",
+      "arrivalTime": "2026-07-29T13:25:00+00:00",
+      "status": 0
+    }
+  ],
+  "isSuccess": true,
+  "isFailure": false,
+  "errors": []
+}

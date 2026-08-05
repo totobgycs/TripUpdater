@@ -15,6 +15,8 @@ internal sealed class UpdateLogConfiguration : IEntityTypeConfiguration<UpdateLo
         builder.Property(l => l.TripNo).IsRequired();
         builder.Property(l => l.UpdateTimestamp).IsRequired();
         builder.Property(l => l.PreviousStatus).HasConversion<string>().HasMaxLength(20);
+        builder.Property(l => l.PreviousArrivalTime).IsRequired();
+        builder.Property(l => l.PreviousDepartureTime);
         builder.HasIndex(l => l.TripId);
         builder.HasIndex(l => l.TripNo);
         builder.HasIndex(l => l.UpdateTimestamp);
