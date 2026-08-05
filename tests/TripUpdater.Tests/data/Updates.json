@@ -2,8 +2,33 @@
   "updates": [
     {
       "tripId": 1003,
-      "DepartuerTime": "2026-07-29T08:30:00+00:00",
+      "departureTime": "2026-07-29T08:31:00+00:00",
       "actualArrivalTime": "2026-07-29T09:10:00+00:00"
+    }
+  ]
+}
+{
+  "updates": [
+    {
+      "tripId": 1003,
+      "actualArrivalTime": "2026-07-29T08:50:00+00:00"
+    }
+  ]
+}
+{
+  "updates": [
+    {
+      "tripId": 1003,
+      "actualArrivalTime": "2026-07-29T08:50:00+00:00"
+    },
+    {
+      "tripId": 1004,
+      "departureTime": "2026-07-29T08:30:00+00:00"
+    },
+    {
+      "tripId": 1005,
+      "departureTime": "2026-07-29T08:31:00+00:00",
+      "actualArrivalTime": "2026-07-29T08:30:00+00:00"
     }
   ]
 }
