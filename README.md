@@ -1,6 +1,6 @@
 # TripUpdater Mini-API
 
-A small ASP.NET Core 10 REST API that processes batch trip-updates, recalculates each trip's status, and writes an audit log. The domain is transit: a `Trip` is operated by an `Operator` on a `Line`; an `UpdateLog` records every change.
+A small ASP.NET Core 10 REST API that processes batch trip-updates, recalculates each trip's status, and writes an audit log. The domain is: a `Trip` is operated by an `Operator` on a `Line`; an `UpdateLog` records every change.
 
 ## Architecture
 
@@ -23,48 +23,13 @@ Dependency direction:
 - `Tests → Api, Application, Domain`
 
 ## Key Choices
-
-- **Mediator (source-generated, MIT).** The Mediator source generator produces the `IMediator` implementation and DI registrations at compile time. Handlers are plain `IRequestHandler<TRequest, TResponse>` classes.
-- **FluentValidation pipeline.** A single `ValidationBehavior<TRequest, TResponse>` runs every registered validator before the handler. Failures are converted to `Result.Failure(errors)` and returned to the caller without throwing.
-- **Result pattern.** Expected failures (validation, "trip not found", etc.) are returned as `Result.Failure(...)`, never thrown. The global exception handler is the last line of defense for unexpected exceptions.
+- All domain entities have an **Id**, foreign keys refer to this internal **Id** instead of the external **Id**s like **LineNo**
+- I worked with the assumption that a **Trip** once create for a **Line** would not change to another **Line**
+- Another assumption is that we have a reference arrival time, and the **Early**, **Late**, **Ontime** status is calculated from the actual arrival time against the reference arrival time.
+- Along the implementation I used **KiloCode** with the **GLM 5.2** model
+- **EF Core** - I chose it because I have prior experience with it.
 - **EF Core InMemory (mock database).** Volatile store that resets on restart; seed data restores demo state each run. Keeps the `IAppDbContext`/`DbSet<T>`/LINQ seam intact so swapping to a real provider is a one-line change. NodaTime `Instant` is stored as the CLR type directly; on PostgreSQL the Npgsql NodaTime plugin maps it natively to `timestamptz`.
-- **`IAppDbContext` over repository.** No wrapper around `DbSet<T>` — handlers query the DbContext directly.
-- **`IEndpointGroup` auto-discovery.** Every endpoint group implements `IEndpointGroup` and is discovered by `app.MapEndpoints()`. `Program.cs` does not change when new endpoints are added.
-- **Single `Status` enum.** Shared by `Trip` and `UpdateLog` (`Ontime`, `Early`, `Late`, `Cancelled`, `Invalid`).
-- **`TimeProvider` for timestamps.** `ProcessTripUpdatesHandler` resolves `TimeProvider` to stamp `UpdateLog.UpdateTimestamp` — no `DateTime.Now`.
 
-## Business Rules
-
-Status is computed from `actualArrivalTime` against `DepartureTime` and `OriginalArrivalTime`:
-
-```
-IF actualArrivalTime IS NULL        → CANCELLED
-ELSE IF actualArrivalTime < DepartureTime → INVALID
-ELSE
-  diff (minutes) = actualArrivalTime - OriginalArrivalTime
-  |diff| <= 2                       → ONTIME
-  diff < -2                         → EARLY
-  diff > 2                          → LATE
-```
-
-The rule lives in `Trip.CalculateStatus(DateTimeOffset?)`.
-
-## Run
-
-```bash
-# Restore + build
-dotnet restore
-dotnet build
-
-# Run the API (binds to http://localhost:5156 by default; see launchSettings.json)
-dotnet run --project src/TripUpdater.Api
-
-# Open Swagger UI
-http://localhost:5156/swagger
-
-# Run tests
-dotnet test
-```
 
 The API runs against an in-memory database seeded on each start, so state resets every run — no file to manage. To start clean, just restart the API.
 
@@ -81,44 +46,54 @@ The API runs against an in-memory database seeded on each start, so state resets
 ```http
 POST /updates/trips
 Content-Type: application/json
-
+```
+```json
 {
   "updates": [
-    { "tripId": 1001, "actualArrivalTime": "2026-07-29T08:31:00+00:00" },
-    { "tripId": 1002, "actualArrivalTime": "2026-07-29T08:40:00+00:00" },
-    { "tripId": 1003, "actualArrivalTime": null }
+    {
+      "tripId": 1003,
+      "departureTime": "2026-07-29T08:31:00+00:00",
+      "actualArrivalTime": "2026-07-29T09:10:00+00:00"
+    }
   ]
 }
 ```
-
 ```json
 {
-  "value": {
-    "totalUpdates": 3,
-    "ontime": 1,
-    "early": 1,
-    "late": 0,
-    "cancelled": 1,
-    "invalid": 0,
-    "processedTripIds": [1001, 1002, 1003]
-  },
-  "isSuccess": true,
-  "isFailure": false,
-  "errors": []
+  "updates": [
+    {
+      "tripId": 1003,
+      "actualArrivalTime": "2026-07-29T08:50:00+00:00"
+    }
+  ]
+}
+```
+```json
+{
+  "updates": [
+    {
+      "tripId": 1003,
+      "actualArrivalTime": "2026-07-29T08:50:00+00:00"
+    },
+    {
+      "tripId": 1004,
+      "departureTime": "2026-07-29T08:30:00+00:00"
+    },
+    {
+      "tripId": 1005,
+      "departureTime": "2026-07-29T08:31:00+00:00",
+      "actualArrivalTime": "2026-07-29T08:30:00+00:00"
+    }
+  ]
 }
 ```
 
 See `docs/api.http` for all three endpoints.
 
-## Trade-offs
-
-- **EF Core InMemory over PostgreSQL.** Keeps the demo zero-dependency (no native binaries, no Docker). Trade-off: no relational constraints enforced (unique indexes, FK `OnDelete` are ignored) and state is volatile. The EF configurations stay in place, so a production swap to PostgreSQL is a one-line provider change plus enabling the Npgsql NodaTime plugin — no converter surgery.
-- **Single module.** No bounded contexts; everything lives in one `Application` assembly. Splitting into per-module projects (e.g. `Trips`, `Updates`) would help if the domain grew, but is premature now.
-- **In-process integration tests use the InMemory provider** with a unique database name per fixture instance for isolation. We accept the trade-off that InMemory does not enforce relational constraints; for a demo assignment this keeps the test matrix zero-dependency.
-- **`EnsureCreated` instead of migrations.** Fine for the demo; a real system would use `dotnet ef migrations`.
-
 ## What I would do differently in production
+**The most important change I would do in a real project is that I would put the creation of the log record in a trigger. This way all the changes are captured, including manual updates and updates made in other parts of the program. Also there are no extra inserts sent from the program for every log record.**
 
+## What GLM 5.2 would do differently in production
 - **Authentication & authorization.** JWT bearer with role/claim-based policies. The endpoints are currently anonymous.
 - **Rate limiting & output caching.** `AddRateLimiter` on `POST /updates/trips`, `AddOutputCache` on the read endpoints.
 - **Structured logging with Serilog.** Enrichers for `RequestId`, `CorrelationId`, `TraceId`; sinks for console + Seq/AppInsights.
@@ -130,23 +105,3 @@ See `docs/api.http` for all three endpoints.
 - **Health checks.** `AddHealthChecks().AddDbContextCheck<AppDbContext>()` exposed at `/health/live` and `/health/ready`.
 - **More tests.** Property-based tests for the status rule; integration tests using Testcontainers + real Postgres; snapshot tests for the response shape.
 
-## Layout
-
-```
-TripUpdater.slnx
-Directory.Build.props          # target framework, nullable, analyzers
-Directory.Packages.props       # central package management
-.editorconfig
-.gitignore
-README.md
-src/
-  TripUpdater.Domain/          # entities, enums, Result, exceptions
-  TripUpdater.Application/     # queries/commands, validators, IAppDbContext
-  TripUpdater.Infrastructure/  # AppDbContext, configurations, SeedData
-  TripUpdater.Api/             # Program.cs, Endpoints/, appsettings.json
-tests/
-  TripUpdater.Tests/           # unit + integration
-docs/
-  plan.md
-  api.http
-```
